@@ -1,4 +1,4 @@
-Image annotator
-===============
+Dataset image annotator
+=======================
 
-Image annotation tool
+Dataset image annotation tool

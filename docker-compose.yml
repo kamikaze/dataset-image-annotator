@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  image-annotator-service:
+  dataset-image-annotator-service:
     build:
       context: ./
       dockerfile: Dockerfile
-    image: image-annotator-service
-    container_name: image-annotator
+    image: dataset-image-annotator-service
+    container_name: dataset-image-annotator-service
     environment:
       LOGGING_LEVEL: "${LOGGING_LEVEL:-DEBUG}"

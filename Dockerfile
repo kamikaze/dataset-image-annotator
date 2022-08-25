@@ -4,13 +4,9 @@ WORKDIR /usr/local/bin/deployment
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y curl ca-certificates gnupg
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-
-RUN apt-get install -y gcc g++ make postgresql-server-dev-all libpq-dev libffi-dev git cargo
+RUN apt-get install -y gcc g++ make libffi-dev git cargo
 
 COPY ./ /tmp/build
-COPY src/image_annotator/db/migrations ./migrations/
-COPY src/image_annotator/db/alembic.ini ./alembic.ini
 
 RUN  (cd /tmp/build \
      && python3 -m venv py3env-dev \
@@ -26,17 +22,12 @@ RUN  export APP_HOME=/usr/local/bin/deployment \
          && python3 -m pip install -U pip \
          && python3 -m pip install -U setuptools \
          && python3 -m pip install -U wheel \
-         && python3 -m pip install -U image_annotator --find-links=/tmp/build/dist)
+         && python3 -m pip install -U dataset_image_annotator --find-links=/tmp/build/dist)
 
 
 FROM python:3.10-slim
 
 ENV  PYTHONPATH=/usr/local/bin/deployment
-
-RUN  mkdir -p /usr/local/bin/deployment \
-     && apt-get update \
-     && apt-get -y upgrade \
-     && apt-get install -y libpq-dev
 
 WORKDIR /usr/local/bin/deployment
 
@@ -47,9 +38,4 @@ RUN  groupadd -r appgroup \
      && install -d -o appuser -g appgroup /usr/local/bin/deployment/logs
 
 USER  appuser
-
-EXPOSE 8080
-
-
-CMD ["/usr/local/bin/deployment/py3env/bin/python3", "-m", "uvicorn", "image_annotator.api.http:app", \
-     "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/usr/local/bin/deployment/py3env/bin/python3", "-m", "dataset_image_annotator"]

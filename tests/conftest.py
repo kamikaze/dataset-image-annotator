@@ -1,5 +1,5 @@
 """
-    Dummy conftest.py for image_annotator.
+    Dummy conftest.py for dataset_image_annotator.
 
     If you don't know what this is for, just leave it empty.
     Read more about conftest.py under:

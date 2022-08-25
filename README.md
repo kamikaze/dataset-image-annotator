@@ -1,2 +1,2 @@
-# image_annotator
-Template repo for Python 3 projects
+# dataset_image_annotator
+Dataset image annotation tool

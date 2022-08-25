@@ -1,8 +1,8 @@
-========================
-image_annotator
-========================
+=======================
+dataset_image_annotator
+=======================
 
-This is the documentation of **image_annotator**.
+This is the documentation of **dataset_image_annotator**.
 
 .. note::
 
