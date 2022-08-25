@@ -1,8 +1,8 @@
 ========================
-python3_project_template
+image_annotator
 ========================
 
-This is the documentation of **python3_project_template**.
+This is the documentation of **image_annotator**.
 
 .. note::
 

@@ -1,3 +1,4 @@
-Python3 based project
-=====================
+Image annotator
+===============
 
+Image annotation tool
