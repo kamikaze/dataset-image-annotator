@@ -5,6 +5,7 @@ from pathlib import Path
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQuickControls2 import QQuickStyle
 
 
 def get_parsed_args():
@@ -21,6 +22,7 @@ def main():
     data_root_path = Path(args.data_root)
 
     app = QGuiApplication(sys.argv)
+    QQuickStyle.setStyle('Fusion')
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / 'main.qml'))
 
@@ -28,3 +30,6 @@ def main():
         sys.exit(-1)
 
     sys.exit(app.exec())
+
+
+main()
