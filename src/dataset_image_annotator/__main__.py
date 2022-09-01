@@ -1,11 +1,10 @@
 import argparse
-import os
 import sys
 from pathlib import Path
 
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtQuickControls2 import QQuickStyle
+from PySide6.QtWidgets import QApplication
+
+from dataset_image_annotator.main_window import MainWindow
 
 
 def get_parsed_args():
@@ -21,14 +20,9 @@ def main():
     args = get_parsed_args()
     data_root_path = Path(args.data_root)
 
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle('Fusion')
-    engine = QQmlApplicationEngine()
-    engine.load(os.fspath(Path(__file__).resolve().parent / 'main.qml'))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
-
+    app = QApplication(sys.argv)
+    widget = MainWindow()
+    widget.show()
     sys.exit(app.exec())
 
 
