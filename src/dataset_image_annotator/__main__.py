@@ -64,10 +64,6 @@ def main():
         sys.exit(-1)
 
     window.show()
-
-    with rawpy.imread(image_file_paths[0]) as f:
-        f.extract_thumb()
-
     sys.exit(app.exec())
 
 
