@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+import rawpy
 from PySide6.QtCore import QFile, QIODevice
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication
@@ -27,10 +28,23 @@ def list_dir_images(path: Path) -> Sequence[Path]:
     return files
 
 
+def get_raw_thumbnail(path: Path):
+    with rawpy.imread(str(path)) as raw:
+        try:
+            thumb = raw.extract_thumb()
+        except rawpy.LibRawNoThumbnailError:
+            print('no thumbnail found')
+        except rawpy.LibRawUnsupportedThumbnailError:
+            print('unsupported thumbnail')
+        else:
+            return thumb
+
+
 def main():
     args = get_parsed_args()
     data_root_path = Path(args.data_root)
     image_file_paths = list_dir_images(data_root_path)
+    thumb = get_raw_thumbnail(image_file_paths[0])
 
     app = QApplication(sys.argv)
 
@@ -50,6 +64,9 @@ def main():
         sys.exit(-1)
 
     window.show()
+
+    with rawpy.imread(image_file_paths[0]) as f:
+        f.extract_thumb()
 
     sys.exit(app.exec())
 
