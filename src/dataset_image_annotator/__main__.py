@@ -1,6 +1,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Sequence
 
 from PySide6.QtCore import QFile, QIODevice
 from PySide6.QtUiTools import QUiLoader
@@ -10,15 +11,26 @@ from PySide6.QtWidgets import QApplication
 def get_parsed_args():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--data-root', type=str)
+    # parser.add_argument('--datasets', metavar='DS', type=str, nargs='+')
 
     args, args_other = parser.parse_known_args()
 
     return args
 
 
+def list_dir_images(path: Path) -> Sequence[Path]:
+    if path.is_dir():
+        files = sorted(path.glob('*.ARW'))
+    else:
+        raise FileNotFoundError('Path must be directory')
+
+    return files
+
+
 def main():
     args = get_parsed_args()
     data_root_path = Path(args.data_root)
+    image_file_paths = list_dir_images(data_root_path)
 
     app = QApplication(sys.argv)
 
