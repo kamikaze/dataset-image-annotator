@@ -44,7 +44,9 @@ def main():
     args = get_parsed_args()
     data_root_path = Path(args.data_root)
     image_file_paths = list_dir_images(data_root_path)
-    thumb = get_raw_thumbnail(image_file_paths[0])
+
+    if image_file_paths:
+        thumb = get_raw_thumbnail(image_file_paths[0])
 
     app = QApplication(sys.argv)
 
