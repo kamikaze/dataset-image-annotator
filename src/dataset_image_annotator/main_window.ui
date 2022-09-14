@@ -37,7 +37,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="typeComboBox">
+        <widget class="QComboBox" name="type_combo_box">
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -55,7 +55,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="makeComboBox">
+        <widget class="QComboBox" name="make_combo_box">
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -73,7 +73,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="modelComboBox">
+        <widget class="QComboBox" name="model_combo_box">
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -91,7 +91,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="bodyComboBox">
+        <widget class="QComboBox" name="body_combo_box">
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -109,7 +109,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="colorComboBox">
+        <widget class="QComboBox" name="color_combo_box">
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -118,7 +118,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QGraphicsView" name="photoView"/>
+      <widget class="QGraphicsView" name="photo_view"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="pathHLayout">
@@ -130,7 +130,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="pathEdit"/>
+        <widget class="QLineEdit" name="path_edit"/>
        </item>
        <item>
         <widget class="QToolButton" name="pathBrowserButton">
@@ -142,7 +142,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QScrollArea" name="thumbnailScrollArea">
+      <widget class="QScrollArea" name="thumbnail_scroll_area">
        <property name="verticalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOn</enum>
        </property>
@@ -158,7 +158,7 @@
           <x>0</x>
           <y>0</y>
           <width>1053</width>
-          <height>273</height>
+          <height>274</height>
          </rect>
         </property>
        </widget>

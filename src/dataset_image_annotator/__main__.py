@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import Sequence
 
 import rawpy
-from PySide6.QtCore import QFile, QIODevice
+from PySide6.QtCore import QFile, QIODevice, Qt
+from PySide6.QtGui import QPixmap
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene
 
 
 def get_parsed_args():
@@ -45,10 +46,12 @@ def main():
     data_root_path = Path(args.data_root)
     image_file_paths = list_dir_images(data_root_path)
 
+    app = QApplication(sys.argv)
+
     if image_file_paths:
         thumb = get_raw_thumbnail(image_file_paths[0])
-
-    app = QApplication(sys.argv)
+        thumb_pixmap = QPixmap()
+        thumb_pixmap.loadFromData(thumb.data)
 
     ui_file_name = 'main_window.ui'
     ui_file = QFile(Path(__file__).resolve().parent / ui_file_name)
@@ -60,6 +63,12 @@ def main():
     loader = QUiLoader()
     window = loader.load(ui_file)
     ui_file.close()
+
+    image_label = QLabel()
+    image_label.setPixmap(thumb_pixmap)
+    scene = QGraphicsScene()
+    scene.addWidget(image_label)
+    window.photo_view.setScene(scene)
 
     if not window:
         print(loader.errorString())
