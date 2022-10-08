@@ -41,42 +41,52 @@ def get_raw_thumbnail(path: Path):
             return thumb
 
 
+class MainWindow:
+    def __init__(self, data_root_path: Path):
+        ui_file_name = 'main_window.ui'
+        ui_file = QFile(Path(__file__).resolve().parent / ui_file_name)
+
+        if not ui_file.open(QIODevice.ReadOnly):
+            print(f'Cannot open {ui_file_name}: {ui_file.errorString()}')
+            sys.exit(-1)
+
+        loader = QUiLoader()
+        self.window = loader.load(ui_file)
+        ui_file.close()
+
+        self.window.path_edit.setText(str(data_root_path))
+        self.window.pathBrowserButton.clicked.connect(self.browse_directory)
+
+        image_file_paths = list_dir_images(data_root_path)
+
+        if image_file_paths:
+            thumb = get_raw_thumbnail(image_file_paths[0])
+            thumb_pixmap = QPixmap()
+            thumb_pixmap.loadFromData(thumb.data)
+
+            image_label = QLabel()
+            image_label.setPixmap(thumb_pixmap)
+            scene = QGraphicsScene()
+            scene.addWidget(image_label)
+            self.window.photo_view.setScene(scene)
+
+        if not self.window:
+            print(loader.errorString())
+            sys.exit(-1)
+
+        self.window.show()
+
+    def browse_directory(self):
+        print('wtf')
+
+
 def main():
     args = get_parsed_args()
     data_root_path = Path(args.data_root)
-    image_file_paths = list_dir_images(data_root_path)
 
     app = QApplication(sys.argv)
+    window = MainWindow(data_root_path)
 
-    if image_file_paths:
-        thumb = get_raw_thumbnail(image_file_paths[0])
-        thumb_pixmap = QPixmap()
-        thumb_pixmap.loadFromData(thumb.data)
-
-    ui_file_name = 'main_window.ui'
-    ui_file = QFile(Path(__file__).resolve().parent / ui_file_name)
-
-    if not ui_file.open(QIODevice.ReadOnly):
-        print(f'Cannot open {ui_file_name}: {ui_file.errorString()}')
-        sys.exit(-1)
-
-    loader = QUiLoader()
-    window = loader.load(ui_file)
-    ui_file.close()
-
-    window.path_edit.setText(str(data_root_path))
-
-    # image_label = QLabel()
-    # image_label.setPixmap(thumb_pixmap)
-    # scene = QGraphicsScene()
-    # scene.addWidget(image_label)
-    # window.photo_view.setScene(scene)
-
-    if not window:
-        print(loader.errorString())
-        sys.exit(-1)
-
-    window.show()
     sys.exit(app.exec())
 
 
