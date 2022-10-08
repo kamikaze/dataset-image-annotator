@@ -64,11 +64,11 @@ def main():
     window = loader.load(ui_file)
     ui_file.close()
 
-    image_label = QLabel()
-    image_label.setPixmap(thumb_pixmap)
-    scene = QGraphicsScene()
-    scene.addWidget(image_label)
-    window.photo_view.setScene(scene)
+    # image_label = QLabel()
+    # image_label.setPixmap(thumb_pixmap)
+    # scene = QGraphicsScene()
+    # scene.addWidget(image_label)
+    # window.photo_view.setScene(scene)
 
     if not window:
         print(loader.errorString())
