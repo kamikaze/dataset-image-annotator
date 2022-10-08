@@ -64,6 +64,8 @@ def main():
     window = loader.load(ui_file)
     ui_file.close()
 
+    window.path_edit.setText(str(data_root_path))
+
     # image_label = QLabel()
     # image_label.setPixmap(thumb_pixmap)
     # scene = QGraphicsScene()

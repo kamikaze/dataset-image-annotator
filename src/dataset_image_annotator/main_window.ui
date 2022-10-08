@@ -23,163 +23,178 @@
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="typeHLayout">
       <item>
-       <layout class="QHBoxLayout" name="typeHLayout">
-        <item>
-         <widget class="QLabel" name="typeLabel">
-          <property name="text">
-           <string>Type:</string>
-          </property>
-          <property name="buddy">
-           <cstring>type_combo_box</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="type_combo_box">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="makeHLayout">
-        <item>
-         <widget class="QLabel" name="makeLabel">
-          <property name="text">
-           <string>Make:</string>
-          </property>
-          <property name="buddy">
-           <cstring>make_combo_box</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="make_combo_box">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="modelHLayout">
-        <item>
-         <widget class="QLabel" name="modelLabel">
-          <property name="text">
-           <string>Model:</string>
-          </property>
-          <property name="buddy">
-           <cstring>model_combo_box</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="model_combo_box">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="bodyHLayout">
-        <item>
-         <widget class="QLabel" name="bodyLabel">
-          <property name="text">
-           <string>Body:</string>
-          </property>
-          <property name="buddy">
-           <cstring>body_combo_box</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="body_combo_box">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="colorHLayout">
-        <item>
-         <widget class="QLabel" name="colorLabel">
-          <property name="text">
-           <string>Color:</string>
-          </property>
-          <property name="buddy">
-           <cstring>color_combo_box</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="color_combo_box">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QGraphicsView" name="photo_view"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="pathHLayout">
-        <item>
-         <widget class="QLabel" name="pathLabel">
-          <property name="text">
-           <string>Path:</string>
-          </property>
-          <property name="buddy">
-           <cstring>path_edit</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="path_edit"/>
-        </item>
-        <item>
-         <widget class="QToolButton" name="pathBrowserButton">
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QScrollArea" name="thumbnail_scroll_area">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
+       <widget class="QLabel" name="typeLabel">
+        <property name="text">
+         <string>Type:</string>
         </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
+        <property name="buddy">
+         <cstring>type_combo_box</cstring>
         </property>
-        <property name="widgetResizable">
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="type_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>764</width>
-           <height>131</height>
-          </rect>
-         </property>
-        </widget>
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="makeHLayout">
+      <item>
+       <widget class="QLabel" name="makeLabel">
+        <property name="text">
+         <string>Make:</string>
+        </property>
+        <property name="buddy">
+         <cstring>make_combo_box</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="make_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="modelHLayout">
+      <item>
+       <widget class="QLabel" name="modelLabel">
+        <property name="text">
+         <string>Model:</string>
+        </property>
+        <property name="buddy">
+         <cstring>model_combo_box</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="model_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="bodyHLayout">
+      <item>
+       <widget class="QLabel" name="bodyLabel">
+        <property name="text">
+         <string>Body:</string>
+        </property>
+        <property name="buddy">
+         <cstring>body_combo_box</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="body_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="colorHLayout">
+      <item>
+       <widget class="QLabel" name="colorLabel">
+        <property name="text">
+         <string>Color:</string>
+        </property>
+        <property name="buddy">
+         <cstring>color_combo_box</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="color_combo_box">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QGraphicsView" name="photo_view"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="pathHLayout">
+      <item>
+       <widget class="QLabel" name="pathLabel">
+        <property name="text">
+         <string>Path:</string>
+        </property>
+        <property name="buddy">
+         <cstring>path_edit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="path_edit"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="pathBrowserButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QScrollArea" name="thumbnail_scroll_area">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>766</width>
+         <height>133</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
