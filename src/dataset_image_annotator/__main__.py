@@ -7,7 +7,7 @@ import rawpy
 from PySide6.QtCore import QFile, QIODevice, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene
+from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog
 
 
 def get_parsed_args():
@@ -43,6 +43,7 @@ def get_raw_thumbnail(path: Path):
 
 class MainWindow:
     def __init__(self, data_root_path: Path):
+        self.data_root_path = data_root_path
         ui_file_name = 'main_window.ui'
         ui_file = QFile(Path(__file__).resolve().parent / ui_file_name)
 
@@ -54,10 +55,27 @@ class MainWindow:
         self.window = loader.load(ui_file)
         ui_file.close()
 
-        self.window.path_edit.setText(str(data_root_path))
-        self.window.pathBrowserButton.clicked.connect(self.browse_directory)
+        self.set_data_root_path(str(data_root_path))
+        self.window.path_browser_button.clicked.connect(self.browse_directory)
+        self.window.path_edit.textChanged.connect(self.load_images)
 
-        image_file_paths = list_dir_images(data_root_path)
+        if not self.window:
+            print(loader.errorString())
+            sys.exit(-1)
+
+        self.window.show()
+
+    def browse_directory(self):
+        path = QFileDialog.getExistingDirectory(self.window, 'Select dataset directory', str(self.data_root_path),
+                                                options=QFileDialog.Option.ShowDirsOnly)
+        self.set_data_root_path(path)
+
+    def set_data_root_path(self, path: str):
+        self.window.path_edit.setText(path)
+        self.data_root_path = Path(path)
+
+    def load_images(self):
+        image_file_paths = list_dir_images(self.data_root_path)
 
         if image_file_paths:
             thumb = get_raw_thumbnail(image_file_paths[0])
@@ -69,15 +87,6 @@ class MainWindow:
             scene = QGraphicsScene()
             scene.addWidget(image_label)
             self.window.photo_view.setScene(scene)
-
-        if not self.window:
-            print(loader.errorString())
-            sys.exit(-1)
-
-        self.window.show()
-
-    def browse_directory(self):
-        print('wtf')
 
 
 def main():
