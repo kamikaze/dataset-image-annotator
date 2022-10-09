@@ -5,7 +5,7 @@ from typing import Sequence
 
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QScreen
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog
 
@@ -94,7 +94,12 @@ def main():
     data_root_path = Path(args.data_root)
 
     app = QApplication(sys.argv)
-    window = MainWindow(data_root_path)
+    mainwindow = MainWindow(data_root_path)
+
+    center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+    geo = mainwindow.window.frameGeometry()
+    geo.moveCenter(center)
+    mainwindow.window.move(geo.topLeft())
 
     sys.exit(app.exec())
 
