@@ -59,6 +59,9 @@ class MainWindow:
         self.window.path_browser_button.clicked.connect(self.browse_directory)
         self.window.path_edit.textChanged.connect(self.load_images)
 
+        if self.data_root_path:
+            self.load_images()
+
         if not self.window:
             print(loader.errorString())
             sys.exit(-1)
