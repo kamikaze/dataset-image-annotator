@@ -163,7 +163,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QScrollArea" name="thumbnail_scroll_area">
+       <widget class="QListWidget" name="thumbnail_list_widget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -172,29 +172,47 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>128</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAsNeeded</enum>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
         </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAsNeeded</enum>
+        <property name="itemAlignment">
+         <set>Qt::AlignCenter</set>
         </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
+        <property name="sortingEnabled">
+         <bool>false</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>126</width>
-           <height>499</height>
-          </rect>
-         </property>
-        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListView" name="thumbnail_list_view">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="itemAlignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
       </item>
      </layout>

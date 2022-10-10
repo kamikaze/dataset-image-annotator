@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Sequence
 
 import rawpy
-from PySide6.QtCore import QFile, QIODevice, Qt
+from PySide6.QtCore import QFile, QIODevice, Qt, QDir
 from PySide6.QtGui import QPixmap, QScreen
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog
+from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel
 
 
 def get_parsed_args():
@@ -81,6 +81,12 @@ class MainWindow:
         image_file_paths = list_dir_images(self.data_root_path)
 
         if image_file_paths:
+            model = QFileSystemModel()
+            model.setFilter(QDir.Files)
+            model.setRootPath(QDir.rootPath())
+            self.window.thumbnail_list_view.setModel(model)
+            self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
+
             thumb = get_raw_thumbnail(image_file_paths[0])
             thumb_pixmap = QPixmap()
             thumb_pixmap.loadFromData(thumb.data)
