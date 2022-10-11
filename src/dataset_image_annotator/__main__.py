@@ -49,7 +49,7 @@ class RawIconProvider(QFileIconProvider):
                 thumbnail = get_raw_thumbnail(file_info.absoluteFilePath())
                 thumb_pixmap = QPixmap()
                 thumb_pixmap.loadFromData(thumbnail.data)
-                thumb_pixmap = thumb_pixmap.scaledToWidth(100)
+                thumb_pixmap = thumb_pixmap.scaledToWidth(80)
 
                 return QIcon(thumb_pixmap)
 
@@ -101,6 +101,8 @@ class MainWindow:
             model.setRootPath(QDir.rootPath())
             model.setIconProvider(RawIconProvider())
             self.window.thumbnail_list_view.setViewMode(QListView.IconMode)
+            self.window.thumbnail_list_view.setLayoutMode(QListView.Batched)
+            self.window.thumbnail_list_view.setBatchSize(20)
             self.window.thumbnail_list_view.setModel(model)
             self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
 
