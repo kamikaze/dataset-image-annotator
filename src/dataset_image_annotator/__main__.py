@@ -1,13 +1,14 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, Union
 
 import rawpy
-from PySide6.QtCore import QFile, QIODevice, Qt, QDir
-from PySide6.QtGui import QPixmap, QScreen
+from PySide6.QtCore import QFile, QIODevice, Qt, QDir, QFileInfo
+from PySide6.QtGui import QPixmap, QScreen, QIcon
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel
+from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, \
+    QFileIconProvider
 
 
 def get_parsed_args():
@@ -29,7 +30,7 @@ def list_dir_images(path: Path) -> Sequence[Path]:
     return files
 
 
-def get_raw_thumbnail(path: Path):
+def get_raw_thumbnail(path: Union[str, Path]):
     with rawpy.imread(str(path)) as raw:
         try:
             thumb = raw.extract_thumb()
@@ -39,6 +40,20 @@ def get_raw_thumbnail(path: Path):
             print('unsupported thumbnail')
         else:
             return thumb
+
+
+class RawIconProvider(QFileIconProvider):
+    def icon(self, file_info: QFileInfo) -> QIcon:
+        if isinstance(file_info, QFileInfo):
+            if file_info.fileName().lower().endswith('.arw'):
+                thumbnail = get_raw_thumbnail(file_info.absoluteFilePath())
+                thumb_pixmap = QPixmap()
+                thumb_pixmap.loadFromData(thumbnail.data)
+                thumb_pixmap = thumb_pixmap.scaledToWidth(100)
+
+                return QIcon(thumb_pixmap)
+
+            return super().icon(self.File)
 
 
 class MainWindow:
@@ -84,6 +99,8 @@ class MainWindow:
             model = QFileSystemModel()
             model.setFilter(QDir.Files)
             model.setRootPath(QDir.rootPath())
+            model.setIconProvider(RawIconProvider())
+            self.window.thumbnail_list_view.setViewMode(QListView.IconMode)
             self.window.thumbnail_list_view.setModel(model)
             self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
 

@@ -163,34 +163,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="thumbnail_list_widget">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="itemAlignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="sortingEnabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QListView" name="thumbnail_list_view">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
@@ -200,13 +172,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>110</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>110</width>
           <height>16777215</height>
          </size>
         </property>
@@ -249,7 +221,7 @@
      <x>0</x>
      <y>0</y>
      <width>906</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
