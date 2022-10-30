@@ -45,11 +45,21 @@ def get_raw_thumbnail(path: Union[str, Path]):
 class RawIconProvider(QFileIconProvider):
     def icon(self, file_info: QFileInfo) -> QIcon:
         if isinstance(file_info, QFileInfo):
+            file_path = file_info.absoluteFilePath()
+            thumbnail_path = Path(f'{file_path}.thumb')
+            thumb_pixmap = QPixmap()
+
             if file_info.fileName().lower().endswith('.arw'):
-                thumbnail = get_raw_thumbnail(file_info.absoluteFilePath())
-                thumb_pixmap = QPixmap()
-                thumb_pixmap.loadFromData(thumbnail.data)
-                thumb_pixmap = thumb_pixmap.scaledToWidth(80)
+                if thumbnail_path.exists():
+                    thumb_pixmap.load(str(thumbnail_path))
+                else:
+                    thumbnail = get_raw_thumbnail(file_path)
+                    thumb_pixmap.loadFromData(thumbnail.data)
+                    thumb_pixmap = thumb_pixmap.scaledToWidth(80)
+
+                    f = QFile(thumbnail_path)
+                    f.open(QIODevice.WriteOnly)
+                    thumb_pixmap.save(f, 'PNG')
 
                 return QIcon(thumb_pixmap)
 
@@ -98,6 +108,8 @@ class MainWindow:
         if image_file_paths:
             model = QFileSystemModel()
             model.setFilter(QDir.Files)
+            model.setNameFilters(('*.arw',))
+            model.setNameFilterDisables(False)
             model.setRootPath(QDir.rootPath())
             model.setIconProvider(RawIconProvider())
             self.window.thumbnail_list_view.setViewMode(QListView.IconMode)
