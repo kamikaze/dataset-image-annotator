@@ -46,10 +46,15 @@ class RawIconProvider(QFileIconProvider):
     def icon(self, file_info: QFileInfo) -> QIcon:
         if isinstance(file_info, QFileInfo):
             file_path = file_info.absoluteFilePath()
-            thumbnail_path = Path(f'{file_path}.thumb')
-            thumb_pixmap = QPixmap()
+            file_name = file_info.fileName().lower()
 
-            if file_info.fileName().lower().endswith('.arw'):
+            if file_name.endswith('.arw'):
+                thumbnail_dir_path = Path(f'{Path(file_path).parent}/.thumbs')
+
+                thumbnail_dir_path.mkdir(exist_ok=True)
+                thumbnail_path = Path(f'{thumbnail_dir_path}/{file_name}.png')
+                thumb_pixmap = QPixmap()
+
                 if thumbnail_path.exists():
                     thumb_pixmap.load(str(thumbnail_path))
                 else:
