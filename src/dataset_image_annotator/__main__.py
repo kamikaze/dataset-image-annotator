@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Sequence, Union
 
 import rawpy
-from PySide6.QtCore import QFile, QIODevice, Qt, QDir, QFileInfo
+from PySide6.QtCore import QFile, QIODevice, Qt, QDir, QFileInfo, QModelIndex
 from PySide6.QtGui import QPixmap, QScreen, QIcon
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, \
@@ -96,12 +96,28 @@ class MainWindow:
             print(loader.errorString())
             sys.exit(-1)
 
+        self.window.thumbnail_list_view.clicked.connect(self.on_file_selected)
+
         self.window.show()
 
     def browse_directory(self):
         path = QFileDialog.getExistingDirectory(self.window, 'Select dataset directory', str(self.data_root_path),
                                                 options=QFileDialog.Option.ShowDirsOnly)
         self.set_data_root_path(path)
+
+    def on_file_selected(self, index: QModelIndex):
+        file_name = index.data()
+        file_path = Path(self.data_root_path, file_name)
+
+        thumb = get_raw_thumbnail(file_path)
+        thumb_pixmap = QPixmap()
+        thumb_pixmap.loadFromData(thumb.data)
+
+        image_label = QLabel()
+        image_label.setPixmap(thumb_pixmap)
+        scene = QGraphicsScene()
+        scene.addWidget(image_label)
+        self.window.photo_view.setScene(scene)
 
     def set_data_root_path(self, path: str):
         self.window.path_edit.setText(path)
@@ -122,16 +138,6 @@ class MainWindow:
             self.window.thumbnail_list_view.setBatchSize(20)
             self.window.thumbnail_list_view.setModel(model)
             self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
-
-            thumb = get_raw_thumbnail(image_file_paths[0])
-            thumb_pixmap = QPixmap()
-            thumb_pixmap.loadFromData(thumb.data)
-
-            image_label = QLabel()
-            image_label.setPixmap(thumb_pixmap)
-            scene = QGraphicsScene()
-            scene.addWidget(image_label)
-            self.window.photo_view.setScene(scene)
 
 
 def main():
