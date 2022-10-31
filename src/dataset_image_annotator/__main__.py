@@ -7,8 +7,9 @@ import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex
 from PySide6.QtGui import QPixmap, QScreen, QIcon
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, \
-    QFileIconProvider
+from PySide6.QtWidgets import (
+    QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, QFileIconProvider
+)
 
 
 def get_parsed_args():
@@ -97,7 +98,6 @@ class MainWindow:
             sys.exit(-1)
 
         self.window.thumbnail_list_view.clicked.connect(self.on_file_selected)
-
         self.window.show()
 
     def browse_directory(self):
