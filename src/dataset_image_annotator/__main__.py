@@ -98,7 +98,7 @@ class MainWindow:
             sys.exit(-1)
 
         self.window.thumbnail_list_view.clicked.connect(self.on_file_selected)
-        self.window.show()
+        self.window.showMaximized()
 
     def browse_directory(self):
         path = QFileDialog.getExistingDirectory(self.window, 'Select dataset directory', str(self.data_root_path),
