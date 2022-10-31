@@ -113,10 +113,8 @@ class MainWindow:
         thumb_pixmap = QPixmap()
         thumb_pixmap.loadFromData(thumb.data)
 
-        image_label = QLabel()
-        image_label.setPixmap(thumb_pixmap)
         scene = QGraphicsScene()
-        scene.addWidget(image_label)
+        scene.addPixmap(thumb_pixmap)
         self.window.photo_view.setScene(scene)
 
     def set_data_root_path(self, path: str):
