@@ -8,7 +8,7 @@ from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex
 from PySide6.QtGui import QPixmap, QScreen, QIcon
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
-    QApplication, QLabel, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, QFileIconProvider
+    QApplication, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, QFileIconProvider
 )
 
 
