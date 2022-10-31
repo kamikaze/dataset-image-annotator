@@ -142,7 +142,7 @@ class MainWindow:
 
 def main():
     args = get_parsed_args()
-    data_root_path = Path(args.data_root)
+    data_root_path = Path(args.data_root).expanduser()
 
     app = QApplication(sys.argv)
     mainwindow = MainWindow(data_root_path)
