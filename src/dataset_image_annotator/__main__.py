@@ -63,12 +63,12 @@ class RawIconProvider(QFileIconProvider):
                     thumb_pixmap = thumb_pixmap.scaledToWidth(80)
 
                     f = QFile(thumbnail_path)
-                    f.open(QIODevice.WriteOnly)
+                    f.open(QIODevice.OpenModeFlag.WriteOnly)
                     thumb_pixmap.save(f, 'PNG')
 
                 return QIcon(thumb_pixmap)
 
-            return super().icon(self.File)
+            return super().icon(self.IconType.File)
 
 
 class MainWindow:
@@ -77,7 +77,7 @@ class MainWindow:
         ui_file_name = 'main_window.ui'
         ui_file = QFile(Path(__file__).resolve().parent / ui_file_name)
 
-        if not ui_file.open(QIODevice.ReadOnly):
+        if not ui_file.open(QIODevice.OpenModeFlag.ReadOnly):
             print(f'Cannot open {ui_file_name}: {ui_file.errorString()}')
             sys.exit(-1)
 
@@ -133,8 +133,8 @@ class MainWindow:
             model.setNameFilterDisables(False)
             model.setRootPath(QDir.rootPath())
             model.setIconProvider(RawIconProvider())
-            self.window.thumbnail_list_view.setViewMode(QListView.IconMode)
-            self.window.thumbnail_list_view.setLayoutMode(QListView.Batched)
+            self.window.thumbnail_list_view.setViewMode(QListView.ViewMode.IconMode)
+            self.window.thumbnail_list_view.setLayoutMode(QListView.LayoutMode.Batched)
             self.window.thumbnail_list_view.setBatchSize(20)
             self.window.thumbnail_list_view.setModel(model)
             self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
