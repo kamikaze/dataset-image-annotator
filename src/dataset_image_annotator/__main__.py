@@ -128,7 +128,7 @@ class MainWindow:
 
         if image_file_paths:
             model = QFileSystemModel()
-            model.setFilter(QDir.Files)
+            model.setFilter(QDir.Filter.Files)
             model.setNameFilters(('*.arw',))
             model.setNameFilterDisables(False)
             model.setRootPath(QDir.rootPath())
