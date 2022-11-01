@@ -145,11 +145,6 @@ def main():
     app = QApplication(sys.argv)
     mainwindow = MainWindow(data_root_path)
 
-    center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
-    geo = mainwindow.window.frameGeometry()
-    geo.moveCenter(center)
-    mainwindow.window.move(geo.topLeft())
-
     sys.exit(app.exec())
 
 
