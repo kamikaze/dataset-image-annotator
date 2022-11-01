@@ -5,7 +5,7 @@ from typing import Sequence, Union
 
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex
-from PySide6.QtGui import QPixmap, QScreen, QIcon
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QApplication, QGraphicsScene, QFileDialog, QFileSystemModel, QListView, QFileIconProvider
@@ -116,6 +116,12 @@ class MainWindow:
         scene = QGraphicsScene()
         scene.addPixmap(thumb_pixmap)
         self.window.photo_view.setScene(scene)
+
+        self.window.type_combo_box.setEnabled(True)
+        self.window.make_combo_box.setEnabled(True)
+        self.window.model_combo_box.setEnabled(True)
+        self.window.body_combo_box.setEnabled(True)
+        self.window.color_combo_box.setEnabled(True)
 
     def set_data_root_path(self, path: str):
         self.window.path_edit.setText(path)
