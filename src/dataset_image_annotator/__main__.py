@@ -128,7 +128,8 @@ class MainWindow:
         self.data_root_path = Path(path)
 
     def load_images(self):
-        image_file_paths = list_dir_images(self.data_root_path)
+        data_root_path = Path(self.window.path_edit.text())
+        image_file_paths = list_dir_images(data_root_path)
 
         if image_file_paths:
             model = QFileSystemModel()
@@ -141,7 +142,7 @@ class MainWindow:
             self.window.thumbnail_list_view.setLayoutMode(QListView.LayoutMode.Batched)
             self.window.thumbnail_list_view.setBatchSize(20)
             self.window.thumbnail_list_view.setModel(model)
-            self.window.thumbnail_list_view.setRootIndex(model.index(str(self.data_root_path)))
+            self.window.thumbnail_list_view.setRootIndex(model.index(str(data_root_path)))
 
 
 def main():
