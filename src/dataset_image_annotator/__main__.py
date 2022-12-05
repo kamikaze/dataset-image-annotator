@@ -46,19 +46,16 @@ def list_dir_metadata(path: Path) -> Optional[Sequence[Path]]:
 
 
 def load_metadata(data_root_path: Path):
+    metadata = {}
     metadata_files = list_dir_metadata(data_root_path)
 
-    if not metadata_files:
-        return
-
-    metadata = {}
-
-    for metadata_file in metadata_files:
-        try:
-            with open(metadata_file, 'r') as f:
-                metadata[metadata_file.name.lower()] = json.load(f)
-        except FileNotFoundError:
-            pass
+    if metadata_files:
+        for metadata_file in metadata_files:
+            try:
+                with open(metadata_file, 'r') as f:
+                    metadata[metadata_file.name.lower()] = json.load(f)
+            except FileNotFoundError:
+                pass
 
     return metadata
 
