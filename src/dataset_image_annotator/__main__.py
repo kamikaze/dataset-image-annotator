@@ -59,6 +59,7 @@ def load_metadata(data_root_path: Path):
 
     return metadata
 
+
 def get_raw_thumbnail(path: Union[str, Path]):
     with rawpy.imread(str(path)) as raw:
         try:
