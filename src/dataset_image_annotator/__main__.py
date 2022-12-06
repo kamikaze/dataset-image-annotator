@@ -1,8 +1,9 @@
 import argparse
 import json
 import sys
+from collections import defaultdict
 from pathlib import Path
-from typing import Sequence, Union, Optional
+from typing import Sequence, Union, Optional, Mapping
 
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex, Qt, QStringListModel
@@ -46,7 +47,7 @@ def list_dir_metadata(path: Path) -> Optional[Sequence[Path]]:
 
 
 def load_metadata(data_root_path: Path):
-    metadata = {}
+    metadata = defaultdict(dict)
     metadata_files = list_dir_metadata(data_root_path)
 
     if metadata_files:
@@ -58,6 +59,16 @@ def load_metadata(data_root_path: Path):
                 pass
 
     return metadata
+
+
+def save_metadata(data_root_path: Path, file_name: str, metadata: Mapping):
+    metadata_dir_path = Path(data_root_path, '.metadata')
+    metadata_file_path = Path(metadata_dir_path, f'{file_name.lower()}.json')
+
+    metadata_dir_path.mkdir(exist_ok=True)
+
+    with open(metadata_file_path, 'w') as f:
+        json.dump(metadata, f)
 
 
 def get_raw_thumbnail(path: Union[str, Path]):
@@ -104,7 +115,8 @@ class RawIconProvider(QFileIconProvider):
 class MainWindow:
     def __init__(self, data_root_path: Path):
         self.data_root_path = None
-        self.metadata = {}
+        self.metadata = defaultdict(dict)
+        self.selected_file_name: Optional[str] = None
         self.types = set()
         self.makes = set()
         self.models = set()
@@ -126,22 +138,31 @@ class MainWindow:
         self.type_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.type_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.type_completer.setWidget(self.window.type_combo_box)
+        self.window.type_combo_box.editTextChanged.connect(self.on_type_changed)
+
         self.make_completer = QCompleter()
         self.make_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.make_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.make_completer.setWidget(self.window.make_combo_box)
+        self.window.make_combo_box.editTextChanged.connect(self.on_make_changed)
+
         self.model_completer = QCompleter()
         self.model_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.model_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.model_completer.setWidget(self.window.model_combo_box)
+        self.window.model_combo_box.editTextChanged.connect(self.on_model_changed)
+
         self.body_completer = QCompleter()
         self.body_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.body_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.body_completer.setWidget(self.window.body_combo_box)
+        self.window.body_combo_box.editTextChanged.connect(self.on_body_changed)
+
         self.color_completer = QCompleter()
         self.color_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.color_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.color_completer.setWidget(self.window.color_combo_box)
+        self.window.color_combo_box.editTextChanged.connect(self.on_color_changed)
 
         self.window.path_browser_button.clicked.connect(self.browse_directory)
         self.window.path_edit.textChanged.connect(self.on_data_root_path_changed)
@@ -161,9 +182,35 @@ class MainWindow:
                                                 options=QFileDialog.Option.ShowDirsOnly)
         self.window.path_edit.setText(path)
 
+
+    def on_metadata_property_changed(self, key: str, value: str):
+        current_metadata = self.metadata[self.selected_file_name.lower()]
+        current_metadata[key] = value.lower()
+        save_metadata(self.data_root_path, self.selected_file_name, current_metadata)
+
+
+    def on_type_changed(self, value: str):
+        self.on_metadata_property_changed('type', value)
+
+    def on_make_changed(self, value: str):
+        self.on_metadata_property_changed('make', value)
+
+
+    def on_model_changed(self, value: str):
+        self.on_metadata_property_changed('model', value)
+
+
+    def on_body_changed(self, value: str):
+        self.on_metadata_property_changed('body', value)
+
+
+    def on_color_changed(self, value: str):
+        self.on_metadata_property_changed('color', value)
+
+
     def on_file_selected(self, index: QModelIndex):
-        file_name = index.data()
-        file_path = Path(self.data_root_path, file_name)
+        self.selected_file_name = index.data()
+        file_path = Path(self.data_root_path, self.selected_file_name)
 
         thumb = get_raw_thumbnail(file_path)
         thumb_pixmap = QPixmap()
@@ -174,15 +221,11 @@ class MainWindow:
         self.window.photo_view.setScene(scene)
 
         self.window.type_combo_box.setEnabled(True)
-        self.window.type_combo_box.setCompleter(self.type_completer)
         self.window.make_combo_box.setEnabled(True)
-        self.window.make_combo_box.setCompleter(self.make_completer)
         self.window.model_combo_box.setEnabled(True)
-        self.window.model_combo_box.setCompleter(self.model_completer)
         self.window.body_combo_box.setEnabled(True)
-        self.window.body_combo_box.setCompleter(self.body_completer)
         self.window.color_combo_box.setEnabled(True)
-        self.window.color_combo_box.setCompleter(self.color_completer)
+
 
 
     def on_data_root_path_changed(self):
@@ -215,22 +258,27 @@ class MainWindow:
         self.window.type_combo_box.clear()
         self.window.type_combo_box.addItems(sorted(self.types))
         self.type_completer.setModel(QStringListModel(sorted(self.types)))
+        self.window.type_combo_box.setCompleter(self.type_completer)
 
         self.window.make_combo_box.clear()
         self.window.make_combo_box.addItems(sorted(self.makes))
         self.make_completer.setModel(QStringListModel(sorted(self.makes)))
+        self.window.make_combo_box.setCompleter(self.make_completer)
 
         self.window.model_combo_box.clear()
         self.window.model_combo_box.addItems(sorted(self.models))
         self.model_completer.setModel(QStringListModel(sorted(self.models)))
+        self.window.model_combo_box.setCompleter(self.model_completer)
 
         self.window.body_combo_box.clear()
         self.window.body_combo_box.addItems(sorted(self.bodies))
         self.body_completer.setModel(QStringListModel(sorted(self.bodies)))
+        self.window.body_combo_box.setCompleter(self.body_completer)
 
         self.window.color_combo_box.clear()
         self.window.color_combo_box.addItems(sorted(self.colors))
         self.color_completer.setModel(QStringListModel(sorted(self.colors)))
+        self.window.color_combo_box.setCompleter(self.color_completer)
 
     def load_images(self, data_root_path: Path):
         image_file_paths = list_dir_images(data_root_path)
