@@ -26,7 +26,7 @@ RUN  export APP_HOME=/usr/local/app \
          && python3 -m pip install -U pip \
          && python3 -m pip install -U setuptools \
          && python3 -m pip install -U wheel \
-         && python3 -m pip install -U dataset_image_annotator --find-links=/tmp/build/dist)
+         && python3 -m pip install -U dataset_image_annotator[web] --find-links=/tmp/build/dist)
 
 
 FROM python:3.11-slim
