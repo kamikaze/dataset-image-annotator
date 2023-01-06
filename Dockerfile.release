@@ -1,5 +1,9 @@
 FROM python:3.11-slim as build-image
 
+WORKDIR /usr/local/app
+COPY src/dataset_image_annotator/db/migrations ./migrations/
+COPY src/dataset_image_annotator/db/alembic.ini ./alembic.ini
+
 RUN apt-get update
 RUN apt-get install -y curl ca-certificates gnupg
 RUN curl -fSsL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /usr/share/keyrings/postgresql.gpg > /dev/null
@@ -7,26 +11,15 @@ RUN apt-get update
 
 RUN apt-get install -y gcc g++ make postgresql-server-dev-all libpq-dev libffi-dev git cargo
 
-COPY ./ /tmp/build
-
-RUN  (cd /tmp/build \
-     && python3 -m venv venv-dev \
-     && . venv-dev/bin/activate \
-     && python3 -m pip install -U -r requirements_dev.txt \
-     && python3 setup.py bdist_wheel)
-
-WORKDIR /usr/local/app
-
-COPY src/dataset_image_annotator/db/migrations ./migrations/
-COPY src/dataset_image_annotator/db/alembic.ini ./alembic.ini
-
-RUN  (python3 -m venv venv \
-      && . venv/bin/activate \
-      && python3 -m pip install -U pip \
-      && python3 -m pip install -U setuptools \
-      && python3 -m pip install -U wheel \
-      && python3 -m pip install -U uvloop \
-      && python3 -m pip install -U /tmp/build/dist/*.whl)
+RUN  export APP_HOME=/usr/local/app \
+     && (cd $APP_HOME \
+         && python3 -m venv venv \
+         && . venv/bin/activate \
+         && python3 -m pip install -U pip \
+         && python3 -m pip install -U setuptools \
+         && python3 -m pip install -U wheel \
+         && python3 -m pip install -U uvloop \
+         && python3 -m pip install -U dataset_image_annotator[web])
 
 
 FROM python:3.11-slim

@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Upload Python Package
+name: Build and push release
 
 on:
   release:
@@ -16,8 +16,8 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
-
+  pypi-build-and-push:
+    name: Build and push wheel package
     runs-on: ubuntu-latest
 
     steps:
@@ -37,3 +37,27 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+
+  docker-build-and-push:
+    name: Build and push Docker images
+    needs: pypi-build-and-push
+    uses: ./.github/workflows/reusable-docker-build.yaml
+
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    secrets:
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    with:
+      dockerhub-enable: true
+      ghcr-enable: true
+      platforms: linux/amd64,linux/arm64
+      file: Dockerfile.release
+
+      image-names: |
+        kamikazer/${{ github.event.repository.name }}
+        ghcr.io/${{ github.repository }}
