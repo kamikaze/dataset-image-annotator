@@ -9,8 +9,8 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt-get install -y gcc g++ make postgresql-server-dev-all libpq-dev libffi-dev git cargo
 
 COPY ./ /tmp/build
-COPY src/fastapi_auth_service/db/migrations ./migrations/
-COPY src/fastapi_auth_service/db/alembic.ini ./alembic.ini
+COPY src/dataset_image_annotator/db/migrations ./migrations/
+COPY src/dataset_image_annotator/db/alembic.ini ./alembic.ini
 
 RUN  (cd /tmp/build \
      && python3 -m venv venv-dev \
