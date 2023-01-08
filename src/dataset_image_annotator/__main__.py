@@ -184,9 +184,10 @@ class MainWindow:
 
 
     def on_metadata_property_changed(self, key: str, value: str):
-        current_metadata = self.metadata[self.selected_file_name.lower()]
-        current_metadata[key] = value.lower()
-        save_metadata(self.data_root_path, self.selected_file_name, current_metadata)
+        if self.selected_file_name:
+            current_metadata = self.metadata[self.selected_file_name.lower()]
+            current_metadata[key] = value.lower()
+            save_metadata(self.data_root_path, self.selected_file_name, current_metadata)
 
 
     def on_type_changed(self, value: str):
