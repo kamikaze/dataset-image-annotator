@@ -4,7 +4,7 @@ from functools import wraps
 from inspect import signature
 from typing import Optional, Any, List
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import Page
 from fastapi_users import FastAPIUsers
@@ -18,6 +18,7 @@ from dataset_image_annotator.api.v1.schemas import (
     UserCreate, UserUpdate, UserItem, UserGroup, UserRead
 )
 from dataset_image_annotator.conf import settings
+from dataset_image_annotator.core import upload_handler
 from dataset_image_annotator.db import database
 from dataset_image_annotator.db.models import User
 from dataset_image_annotator.helpers import connect_to_db
@@ -105,3 +106,17 @@ async def get_user_groups(search: Optional[Json[Any]] = None, order_by: Optional
         return await core.get_user_groups(database, search, order_by)
 
     raise HTTPException(status_code=403)
+
+
+@router.post('/raw-file', response_class=ORJSONResponse, tags=['Admin'])
+@handle_exceptions
+async def upload_raw_file(image_file: UploadFile = File(...)):
+    if not image_file.filename:
+        raise HTTPException(status_code=400, detail='Missing file')
+
+    try:
+        response = await upload_handler.handle_raw_file(database, image_file)
+    except TimeoutError as e:
+        raise HTTPException(status_code=504, detail=str(e))
+
+    return response
