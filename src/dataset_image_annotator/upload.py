@@ -2,7 +2,7 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from dataset_image_annotator.api.client import annotator
+from dataset_image_annotator.api_clients import annotator
 
 
 def get_parsed_args():
