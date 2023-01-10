@@ -3,7 +3,7 @@ import json
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Sequence, Union, Optional, Mapping
+from typing import Sequence, Union, Mapping
 
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex, Qt, QStringListModel
@@ -37,7 +37,7 @@ def list_dir_images(path: Path) -> Sequence[Path]:
     return list_dir(path, '*.ARW')
 
 
-def list_dir_metadata(path: Path) -> Optional[Sequence[Path]]:
+def list_dir_metadata(path: Path) -> Sequence[Path] | None:
     metadata_dir_path = Path(path, '.metadata')
 
     if metadata_dir_path.exists():
@@ -116,7 +116,7 @@ class MainWindow:
     def __init__(self, data_root_path: Path):
         self.data_root_path = None
         self.metadata = defaultdict(dict)
-        self.selected_file_name: Optional[str] = None
+        self.selected_file_name: str | None = None
         self.types = set()
         self.makes = set()
         self.models = set()
