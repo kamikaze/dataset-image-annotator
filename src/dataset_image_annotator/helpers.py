@@ -1,11 +1,7 @@
 import asyncio
 import datetime
 import logging
-import os
-import pathlib
 
-from alembic import command
-from alembic.config import Config
 from asyncpg import CannotConnectNowError
 
 from dataset_image_annotator.conf import settings
@@ -30,17 +26,6 @@ def datetime_from_string(string: str) -> datetime.datetime:
 def date_range(start_date, end_date):
     for n in range(int((end_date - start_date).days + 1)):
         yield start_date + datetime.timedelta(days=n)
-
-
-def run_db_migrations(config, dsn: str, script_location: str) -> None:
-    logger.info(f'Running DB migrations in {script_location}')
-    original_wd = os.getcwd()
-    os.chdir(script_location)
-    alembic_cfg = Config(config)
-    alembic_cfg.attributes['configure_logger'] = False
-    alembic_cfg.set_main_option('sqlalchemy.url', dsn)
-    command.upgrade(alembic_cfg, 'head')
-    os.chdir(original_wd)
 
 
 async def connect_to_db(database):
