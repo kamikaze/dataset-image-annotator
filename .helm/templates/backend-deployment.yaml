@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "annotator-backend.fullname" . }}
+  labels:
+    {{- include "annotator-backend.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "annotator-backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "annotator-backend.selectorLabels" . | nindent 8 }}
+        app: annotator-backend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "annotator-backend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DB_DSN
+              value: "postgresql+asyncpg://{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}"
+            - name: SL_DB_DSN
+              value: "postgresql+asyncpg://{{ .Values.postgresql.slUsername }}:{{ .Values.postgresql.slPassword }}@{{ .Values.postgresql.slHost }}:{{ .Values.postgresql.slPort }}/{{ .Values.postgresql.slDatabase }}"
+            - name: BOOTSTRAP_USER_EMAIL
+              value: "{{ .Values.backend.bootstrapUserEmail }}"
+            - name: SMARTLIS_SERVER
+              value: "{{ .Values.backend.smartlis.address }}"
+            - name: LOGGING_LEVEL
+              value: "{{ .Values.backend.loggingLevel }}"
+            - name: SMARTLIS_CONCURRENCY
+              value: "{{ .Values.backend.smartlis.concurrency }}"
+            - name: SMARTLIS_USER
+              value: "{{ .Values.backend.smartlis.user }}"
+            - name: SMARTLIS_PASSWORD
+              value: "{{ .Values.backend.smartlis.password }}"
+            - name: SERVICE_ADDR
+              value: "0.0.0.0"
+            - name: TIMEZONE
+              value: "{{ .Values.backend.timezone }}"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

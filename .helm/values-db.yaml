@@ -1,0 +1,12 @@
+image:
+  pullPolicy: Always
+  tag: "15"
+
+primary:
+  persistence:
+    size: 1Gi
+
+auth:
+  database: "image-annotations"
+  username: ""
+  password: ""

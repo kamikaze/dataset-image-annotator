@@ -1,0 +1,48 @@
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: annotator-backend
+#  namespace: default
+#spec:
+#  entryPoints:                      # [1]
+#    - web
+#  routes:                           # [2]
+#  - kind: Rule
+#    match: Host(`cc.bixority.com`) && PathPrefix(`/api`) # [3]
+#    priority: 2                    # [4]
+#    middlewares:                    # [5]
+#    - name: middleware1             # [6]
+#      namespace: default            # [7]
+#    services:                       # [8]
+#    - kind: Service
+#      name: annotator-backend
+#      namespace: default
+#      passHostHeader: true
+#      port: 80
+#      responseForwarding:
+#        flushInterval: 1ms
+#      scheme: http
+#      serversTransport: transport
+#      sticky:
+#        cookie:
+#          httpOnly: true
+#          name: cookie
+#          secure: true
+#          sameSite: none
+#      strategy: RoundRobin
+#      weight: 10
+#---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: annotator-backend
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+  - match: Host(`{{ .Values.backend.ingress.host }}`) && PathPrefix(`{{ .Values.backend.ingress.pathPrefix }}`)
+    kind: Rule
+    services:
+    - name: annotator-backend
+      port: {{ .Values.backend.service.port }}
