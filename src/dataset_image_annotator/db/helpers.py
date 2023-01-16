@@ -1,38 +1,59 @@
 import logging
+from typing import Mapping
 
 import sqlalchemy as sa
-from fastapi_users.exceptions import UserAlreadyExists
-from passlib import pwd
-
-from dataset_image_annotator.api.users import create_user
-from dataset_image_annotator.api.v1.schemas import UserCreate
-from dataset_image_annotator.conf import settings
-from dataset_image_annotator.db import database
-from dataset_image_annotator.db.models import User
+from sqlalchemy import desc, asc, func
+from sqlalchemy.sql.elements import BooleanClauseList, UnaryExpression
 
 logger = logging.getLogger()
 
 
-async def bootstrap_db():
-    user_count = await database.fetch_val(sa.select([sa.func.count(User.id)]))
+def get_query(search: Mapping[str, str] | None = None,
+              order_by: str | None = None,
+              columns: Mapping | None = None) -> tuple[BooleanClauseList, UnaryExpression]:
+    """
+        :columns:
+            0: Model column
+            1: case-insensitive if True
+            2: cast value to type
+            3: exact match if True, LIKE %value% if False
+    """
+    if order_by:
+        if order_by.startswith('-'):
+            direction = desc
+            order_by = order_by[1:]
+        else:
+            direction = asc
 
-    if user_count == 0:
-        logger.warning('No users in database')
+        order_by_clause = direction(columns[order_by][0])
+    else:
+        order_by_clause = None
 
-        if settings.bootstrap_user_email:
-            logger.info('Bootstrapping a user in database')
-            password = pwd.genword(length=16, entropy=52)
+    if search:
+        where_parts = [
+            *(
+                (func.upper(columns[k][0])
+                 if columns[k][1]
+                 else columns[k][0]
+                 ) == columns[k][2](v)
+                for k, v in search.items()
+                if columns[k][3]
+            ),
+            *(
+                (func.upper(columns[k][0])
+                 if columns[k][1]
+                 else columns[k][0]
+                 ).like(f'%{v.upper()}%')
+                for k, v in search.items()
+                if not columns[k][3]
+            )
+        ]
+    else:
+        where_parts = None
 
-            try:
-                await create_user(
-                    UserCreate(
-                        email=settings.bootstrap_user_email,
-                        password=password,
-                        is_superuser=True,
-                        is_active=True,
-                        is_verified=True
-                    )
-                )
-                logger.debug(f'Bootstrap user: {settings.bootstrap_user_email} / {password}')
-            except UserAlreadyExists:
-                logger.warning(f'User {settings.bootstrap_user_email} already exist')
+    if where_parts:
+        where_clause = sa.and_(*where_parts)
+    else:
+        where_clause = None
+
+    return where_clause, order_by_clause

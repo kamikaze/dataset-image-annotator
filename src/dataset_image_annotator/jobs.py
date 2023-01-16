@@ -1,7 +1,12 @@
 import argparse
 import asyncio
+import contextlib
 import logging.config
 
+from fastapi_users.exceptions import UserAlreadyExists
+
+from dataset_image_annotator.api.users import get_user_db, get_user_manager
+from dataset_image_annotator.api.v1.schemas import UserCreate
 from dataset_image_annotator.conf import settings
 
 
@@ -31,6 +36,27 @@ logging.config.dictConfig({
 })
 
 logger = logging.getLogger(__name__)
+
+
+async def create_superuser():
+    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
+    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+
+    try:
+        async with get_async_session_context() as session:
+            async with get_user_db_context(session) as user_db:
+                async with get_user_manager_context(user_db) as user_manager:
+                    await user_manager.create(
+                        UserCreate(
+                            email=settings.bootstrap_user_email,
+                            password=settings.bootstrap_user_password.get_secret_value(),
+                            is_superuser=True
+                        )
+                    )
+                    logger.info(f'User created: {settings.bootstrap_user_email}')
+    except UserAlreadyExists:
+        logger.warning(f'User already exists: {settings.bootstrap_user_email}')
 
 
 def get_parsed_args():

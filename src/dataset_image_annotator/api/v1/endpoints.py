@@ -15,7 +15,7 @@ from dataset_image_annotator import core
 from dataset_image_annotator.api import users
 from dataset_image_annotator.api.users import get_user_manager
 from dataset_image_annotator.api.v1.schemas import (
-    UserCreate, UserUpdate, UserItem, UserGroup, UserRead
+    UserCreate, UserUpdate, UserItem, UserGroup, UserRead, ImageSampleItem
 )
 from dataset_image_annotator.conf import settings
 from dataset_image_annotator.core import upload_handler
@@ -39,6 +39,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     auth_backends
 )
 get_current_user = fastapi_users.current_user(active=True)
+get_current_superuser = fastapi_users.current_user(active=True, superuser=True)
 auth_router = fastapi_users.get_auth_router(auth_backend, requires_verification=True)
 users_router = fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=True)
 
@@ -80,37 +81,26 @@ def handle_exceptions(func):
 @router.get('/users', response_class=ORJSONResponse, tags=['Admin'])
 @handle_exceptions
 async def get_users(search: Json | None = None, order_by: str | None = None,
-                    user=Depends(get_current_user)) -> Page[UserItem]:
-    if user.is_superuser:
-        return await core.get_users(database, search, order_by)
-
-    raise HTTPException(status_code=403)
+                    user=Depends(get_current_superuser)) -> Page[UserItem]:
+    return await core.get_users(database, search, order_by)
 
 
 @router.post('/users', response_class=ORJSONResponse, tags=['Admin'])
 @handle_exceptions
-async def create_user(new_user: UserCreate, user=Depends(get_current_user)) -> UserItem:
-    if user.is_superuser:
-        created_user = await users.create_user(new_user)
-
-        return created_user
-
-    raise HTTPException(status_code=403)
+async def create_user(new_user: UserCreate, user=Depends(get_current_superuser)) -> UserItem:
+    return await users.create_user(new_user)
 
 
 @router.get('/user-groups', response_class=ORJSONResponse, tags=['Admin'])
 @handle_exceptions
 async def get_user_groups(search: Json | None = None, order_by: str | None = None,
                           user=Depends(get_current_user)) -> Sequence[UserGroup]:
-    if user.is_active:
-        return await core.get_user_groups(database, search, order_by)
-
-    raise HTTPException(status_code=403)
+    return await core.get_user_groups(database, search, order_by)
 
 
 @router.post('/raw-file', response_class=ORJSONResponse, tags=['Admin'])
 @handle_exceptions
-async def upload_raw_file(image_file: UploadFile = File(...)) -> bool:
+async def upload_raw_file(image_file: UploadFile = File(...), user=Depends(get_current_superuser)) -> bool:
     if not image_file.filename:
         raise HTTPException(status_code=400, detail='Missing file')
 
@@ -120,3 +110,9 @@ async def upload_raw_file(image_file: UploadFile = File(...)) -> bool:
         raise HTTPException(status_code=504, detail=str(e))
 
     return response
+
+
+@router.get('/image-samples', response_class=ORJSONResponse, tags=['Images'])
+@handle_exceptions
+async def get_image_samples(search: Json | None = None, order_by: str | None = None) -> Page[ImageSampleItem]:
+    return await core.get_image_samples(search, order_by)
