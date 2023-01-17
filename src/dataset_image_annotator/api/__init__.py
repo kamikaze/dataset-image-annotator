@@ -15,19 +15,25 @@ LOGGING_CONFIG = {
         },
     },
     'handlers': {
-        'default': {
-            'level': settings.logging_level,
+        'default_stdout': {
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
+            'formatter': 'default',
+        },
+        'default_stderr': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stderr',
             'formatter': 'default',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['default', ],
+            'handlers': ['default_stdout', 'default_stderr', ],
         },
         'dataset_image_annotator': {
-            'handlers': ['default', ],
+            'handlers': ['default_stdout', 'default_stderr', ],
             'level': settings.logging_level,
             'propagate': False,
         }
