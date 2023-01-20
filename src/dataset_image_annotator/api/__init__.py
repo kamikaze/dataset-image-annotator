@@ -1,7 +1,5 @@
 import logging.config
 
-import uvicorn
-
 from dataset_image_annotator.api.http import app
 from dataset_image_annotator.conf import settings
 
@@ -11,15 +9,22 @@ LOGGING_CONFIG = {
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            '()': 'dataset_image_annotator.formatter.JSONFormatter',
+            '()': 'dataset_image_annotator.logging.formatter.JSONFormatter',
         },
+    },
+    'filters': {
+        'info_and_below': {
+            '()': 'dataset_image_annotator.logging.filters.filter_maker',
+            'level': 'INFO'
+        }
     },
     'handlers': {
         'default_stdout': {
-            'level': 'INFO',
+            'level': settings.logging_level,
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
             'formatter': 'default',
+            'filters': ['info_and_below', ],
         },
         'default_stderr': {
             'level': 'WARNING',
@@ -30,10 +35,10 @@ LOGGING_CONFIG = {
     },
     'loggers': {
         '': {
-            'handlers': ['default_stdout', 'default_stderr', ],
+            'handlers': ['default_stderr', 'default_stdout', ],
         },
         'dataset_image_annotator': {
-            'handlers': ['default_stdout', 'default_stderr', ],
+            'handlers': ['default_stderr', 'default_stdout', ],
             'level': settings.logging_level,
             'propagate': False,
         }

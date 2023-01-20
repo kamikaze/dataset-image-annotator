@@ -1,36 +1,52 @@
 import argparse
 import asyncio
-import contextlib
 import logging.config
 
 from fastapi_users.exceptions import UserAlreadyExists
 
-from dataset_image_annotator.api.users import get_user_db, get_user_manager
+from dataset_image_annotator.api.users import get_user_manager_context
 from dataset_image_annotator.api.v1.schemas import UserCreate
 from dataset_image_annotator.conf import settings
-
+from dataset_image_annotator.db import database
+from dataset_image_annotator.db.user_db_helpers import get_async_session_context, get_user_db_context
 
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'standard': {
-            'format': settings.logging_format,
+        'default': {
+            '()': 'dataset_image_annotator.logging.formatter.JSONFormatter',
         },
     },
+    'filters': {
+        'info_and_below': {
+            '()': 'dataset_image_annotator.logging.filters.filter_maker',
+            'level': 'INFO'
+        }
+    },
     'handlers': {
-        'default': {
+        'default_stdout': {
             'level': settings.logging_level,
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
-            'formatter': 'standard',
+            'formatter': 'default',
+            'filters': ['info_and_below', ],
+        },
+        'default_stderr': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stderr',
+            'formatter': 'default',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['default'],
+            'handlers': ['default_stderr', 'default_stdout', ],
+        },
+        'dataset_image_annotator': {
+            'handlers': ['default_stderr', 'default_stdout', ],
             'level': settings.logging_level,
-            'propagate': True,
+            'propagate': False,
         }
     }
 })
@@ -39,9 +55,7 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser():
-    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
-    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
-    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+    await database.connect()
 
     try:
         async with get_async_session_context() as session:
@@ -51,12 +65,16 @@ async def create_superuser():
                         UserCreate(
                             email=settings.bootstrap_user_email,
                             password=settings.bootstrap_user_password.get_secret_value(),
-                            is_superuser=True
+                            is_superuser=True,
+                            is_active=True,
+                            is_verified=True
                         )
                     )
                     logger.info(f'User created: {settings.bootstrap_user_email}')
     except UserAlreadyExists:
         logger.warning(f'User already exists: {settings.bootstrap_user_email}')
+    finally:
+        await database.disconnect()
 
 
 def get_parsed_args():
@@ -68,25 +86,20 @@ def get_parsed_args():
     return args
 
 
-async def foo():
-    logger.info('Foo')
-
-
-async def bar():
-    logger.info('Bar')
-
-
 async def main():
     args = get_parsed_args()
     job_mapping = {
-        'foo': foo,
-        'bar': bar,
+        'create_superuser': create_superuser,
     }
 
     try:
-        await job_mapping[args.job]()
+        job = job_mapping[args.job]
     except KeyError:
         logger.error(f'Unknown job: "{args.job}"')
+    else:
+        await job()
+
+    logger.info(f'Job {args.job} finished')
 
 
 if __name__ == '__main__':
