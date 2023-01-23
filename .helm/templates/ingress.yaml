@@ -43,6 +43,9 @@ spec:
   routes:
   - match: Host(`{{ .Values.backend.ingress.host }}`) && PathPrefix(`{{ .Values.backend.ingress.pathPrefix }}`)
     kind: Rule
+    middlewares:
+      - name: test-compress
+        namespace: {{.Release.Namespace}}
     services:
     - name: annotator-backend
       port: {{ .Values.backend.service.port }}
