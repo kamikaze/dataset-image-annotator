@@ -1,9 +1,8 @@
 from pydantic import BaseSettings, PostgresDsn, SecretStr
+from python3_commons.conf import CommonSettings
 
 
-class Settings(BaseSettings):
-    logging_level: str = 'INFO'
-    logging_format: str = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+class Settings(CommonSettings):
     db_dsn: PostgresDsn = None
     service_addr: str = '127.0.0.1'
     service_port: int = 8080

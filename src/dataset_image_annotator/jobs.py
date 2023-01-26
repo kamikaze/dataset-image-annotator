@@ -15,12 +15,12 @@ logging.config.dictConfig({
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            '()': 'dataset_image_annotator.logging.formatter.JSONFormatter',
+            '()': 'python3_commons.logging.formatter.JSONFormatter',
         },
     },
     'filters': {
         'info_and_below': {
-            '()': 'dataset_image_annotator.logging.filters.filter_maker',
+            '()': 'python3_commons.logging.filters.filter_maker',
             'level': 'INFO'
         }
     },
