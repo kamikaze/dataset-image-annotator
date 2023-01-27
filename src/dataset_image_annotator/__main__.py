@@ -1,13 +1,13 @@
 import argparse
+import concurrent.futures
 import json
 import sys
 from collections import defaultdict
-from datetime import datetime
 from functools import partial
-from multiprocessing import Pool
 from pathlib import Path
 from typing import Sequence, Mapping
 
+import cv2
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex, Qt, QStringListModel
 from PySide6.QtGui import QPixmap, QIcon
@@ -86,9 +86,39 @@ def get_raw_thumbnail(path: Path):
             return thumb
 
 
+def anonymize_image(image):
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Load the cascade classifier for detecting cars
+    car_cascade = cv2.CascadeClassifier("cars.xml")
+
+    # Detect cars in the image
+    cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+
+    # Iterate over the detected cars
+    for (x, y, w, h) in cars:
+        # Blur the license plate
+        image[y + h - 20:y + h, x:x + w] = cv2.GaussianBlur(image[y + h - 20:y + h, x:x + w], (23, 23), 30)
+
+    # Load the cascade classifier for detecting faces
+    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+    # Detect faces in the image
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    # Iterate over the detected faces
+    for (x, y, w, h) in faces:
+        # Blur the face
+        image[y:y + h, x:x + w] = cv2.GaussianBlur(image[y:y + h, x:x + w], (23, 23), 30)
+
+    return image
+
+
 def generate_thumbnail(thumbnail_dir_path: Path, path: Path) -> QPixmap:
     thumb_pixmap = QPixmap()
     thumbnail = get_raw_thumbnail(path)
+    thumbnail = anonymize_image(thumbnail)
     thumb_pixmap.loadFromData(thumbnail.data)
     thumb_pixmap = thumb_pixmap.scaledToWidth(80)
     thumbnail_path = thumbnail_dir_path / path.name
@@ -112,12 +142,8 @@ def generate_thumbnails(path: Path):
         thumbnail_dir_path.mkdir(exist_ok=True)
         generate_thumbnail_partial = partial(generate_thumbnail, thumbnail_dir_path)
 
-        print(datetime.now())
-
-        with Pool() as p:
-            p.map(generate_thumbnail_partial, arw_files)
-
-        print(datetime.now())
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            executor.map(generate_thumbnail_partial, arw_files)
 
 
 class RawIconProvider(QFileIconProvider):
