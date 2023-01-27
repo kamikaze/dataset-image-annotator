@@ -2,8 +2,11 @@ import argparse
 import json
 import sys
 from collections import defaultdict
+from datetime import datetime
+from functools import partial
+from multiprocessing import Pool
 from pathlib import Path
-from typing import Sequence, Union, Mapping
+from typing import Sequence, Mapping
 
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex, Qt, QStringListModel
@@ -71,7 +74,7 @@ def save_metadata(data_root_path: Path, file_name: str, metadata: Mapping):
         json.dump(metadata, f)
 
 
-def get_raw_thumbnail(path: Union[str, Path]):
+def get_raw_thumbnail(path: Path):
     with rawpy.imread(str(path)) as raw:
         try:
             thumb = raw.extract_thumb()
@@ -81,6 +84,40 @@ def get_raw_thumbnail(path: Union[str, Path]):
             print('unsupported thumbnail')
         else:
             return thumb
+
+
+def generate_thumbnail(thumbnail_dir_path: Path, path: Path) -> QPixmap:
+    thumb_pixmap = QPixmap()
+    thumbnail = get_raw_thumbnail(path)
+    thumb_pixmap.loadFromData(thumbnail.data)
+    thumb_pixmap = thumb_pixmap.scaledToWidth(80)
+    thumbnail_path = thumbnail_dir_path / path.name
+
+    f = QFile(thumbnail_path)
+    f.open(QIODevice.OpenModeFlag.WriteOnly)
+
+    try:
+        thumb_pixmap.save(f, 'PNG')
+    finally:
+        f.close()
+
+    return thumb_pixmap
+
+
+def generate_thumbnails(path: Path):
+    arw_files = tuple(f for f in path.iterdir() if f.is_file() and f.name.lower().endswith('.arw'))
+
+    if arw_files:
+        thumbnail_dir_path = path / '.thumbs'
+        thumbnail_dir_path.mkdir(exist_ok=True)
+        generate_thumbnail_partial = partial(generate_thumbnail, thumbnail_dir_path)
+
+        print(datetime.now())
+
+        with Pool() as p:
+            p.map(generate_thumbnail_partial, arw_files)
+
+        print(datetime.now())
 
 
 class RawIconProvider(QFileIconProvider):
@@ -94,18 +131,12 @@ class RawIconProvider(QFileIconProvider):
 
                 thumbnail_dir_path.mkdir(exist_ok=True)
                 thumbnail_path = Path(f'{thumbnail_dir_path}/{file_name}.png')
-                thumb_pixmap = QPixmap()
 
                 if thumbnail_path.exists():
+                    thumb_pixmap = QPixmap()
                     thumb_pixmap.load(str(thumbnail_path))
                 else:
-                    thumbnail = get_raw_thumbnail(file_path)
-                    thumb_pixmap.loadFromData(thumbnail.data)
-                    thumb_pixmap = thumb_pixmap.scaledToWidth(80)
-
-                    f = QFile(thumbnail_path)
-                    f.open(QIODevice.OpenModeFlag.WriteOnly)
-                    thumb_pixmap.save(f, 'PNG')
+                    thumb_pixmap = generate_thumbnail(thumbnail_dir_path, Path(file_path))
 
                 return QIcon(thumb_pixmap)
 
@@ -114,7 +145,7 @@ class RawIconProvider(QFileIconProvider):
 
 class MainWindow:
     def __init__(self, data_root_path: Path):
-        self.data_root_path = None
+        self.data_root_path: Path | None = None
         self.metadata = defaultdict(dict)
         self.selected_file_name: str | None = None
         self.types = set()
@@ -182,13 +213,11 @@ class MainWindow:
                                                 options=QFileDialog.Option.ShowDirsOnly)
         self.window.path_edit.setText(path)
 
-
     def on_metadata_property_changed(self, key: str, value: str):
         if self.selected_file_name:
             current_metadata = self.metadata[self.selected_file_name.lower()]
             current_metadata[key] = value.lower()
             save_metadata(self.data_root_path, self.selected_file_name, current_metadata)
-
 
     def on_type_changed(self, value: str):
         self.on_metadata_property_changed('type', value)
@@ -196,18 +225,14 @@ class MainWindow:
     def on_make_changed(self, value: str):
         self.on_metadata_property_changed('make', value)
 
-
     def on_model_changed(self, value: str):
         self.on_metadata_property_changed('model', value)
-
 
     def on_body_changed(self, value: str):
         self.on_metadata_property_changed('body', value)
 
-
     def on_color_changed(self, value: str):
         self.on_metadata_property_changed('color', value)
-
 
     def on_file_selected(self, index: QModelIndex):
         self.selected_file_name = index.data()
@@ -227,10 +252,9 @@ class MainWindow:
         self.window.body_combo_box.setEnabled(True)
         self.window.color_combo_box.setEnabled(True)
 
-
-
     def on_data_root_path_changed(self):
         self.data_root_path = Path(self.window.path_edit.text())
+        generate_thumbnails(self.data_root_path)
         self.load_images(self.data_root_path)
         self.metadata = load_metadata(self.data_root_path)
 
