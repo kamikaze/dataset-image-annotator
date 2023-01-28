@@ -163,9 +163,9 @@ def generate_thumbnails(path: Path):
         thumbnail_dir_path.mkdir(exist_ok=True)
         generate_thumbnail_partial = partial(generate_thumbnail, thumbnail_dir_path)
 
-        tuple(map(generate_thumbnail_partial, arw_files))
-        # with concurrent.futures.ProcessPoolExecutor() as executor:
-        #     executor.map(generate_thumbnail_partial, arw_files)
+        # tuple(map(generate_thumbnail_partial, arw_files))
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            executor.map(generate_thumbnail_partial, arw_files)
 
 
 class RawIconProvider(QFileIconProvider):
