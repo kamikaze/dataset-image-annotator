@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Sequence, Mapping
 
 import cv2
+import numpy as np
 import rawpy
 from PySide6.QtCore import QFile, QIODevice, QDir, QFileInfo, QModelIndex, Qt, QStringListModel
 from PySide6.QtGui import QPixmap, QIcon
@@ -88,21 +89,29 @@ def get_raw_thumbnail(path: Path):
 
 def anonymize_image(image):
     # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    decoded_image = cv2.imdecode(np.frombuffer(image.data, np.uint8), -1)
+    gray = cv2.cvtColor(decoded_image, cv2.COLOR_BGR2GRAY)
 
     # Load the cascade classifier for detecting cars
-    car_cascade = cv2.CascadeClassifier("cars.xml")
+    cascades = (
+        str(Path(Path(__file__).parent, 'cars.xml')),
+        str(Path(cv2.data.haarcascades, 'haarcascade_russian_plate_number.xml'))
+    )
 
-    # Detect cars in the image
-    cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+    for cascade in cascades:
+        car_cascade = cv2.CascadeClassifier(cascade)
 
-    # Iterate over the detected cars
-    for (x, y, w, h) in cars:
-        # Blur the license plate
-        image[y + h - 20:y + h, x:x + w] = cv2.GaussianBlur(image[y + h - 20:y + h, x:x + w], (23, 23), 30)
+        # Detect cars in the image
+        cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+
+        # Iterate over the detected cars
+        for (x, y, w, h) in cars:
+            # Blur the license plate
+            decoded_image[y + h - 20:y + h, x:x + w] = cv2.GaussianBlur(
+                decoded_image[y + h - 20:y + h, x:x + w], (23, 23), 30)
 
     # Load the cascade classifier for detecting faces
-    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    face_cascade = cv2.CascadeClassifier(str(Path(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml')))
 
     # Detect faces in the image
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -110,24 +119,36 @@ def anonymize_image(image):
     # Iterate over the detected faces
     for (x, y, w, h) in faces:
         # Blur the face
-        image[y:y + h, x:x + w] = cv2.GaussianBlur(image[y:y + h, x:x + w], (23, 23), 30)
+        decoded_image[y:y + h, x:x + w] = cv2.GaussianBlur(decoded_image[y:y + h, x:x + w], (23, 23), 30)
 
-    return image
+    return cv2.imencode('.jpg', decoded_image)[1].tobytes()
 
 
 def generate_thumbnail(thumbnail_dir_path: Path, path: Path) -> QPixmap:
-    thumb_pixmap = QPixmap()
     thumbnail = get_raw_thumbnail(path)
     thumbnail = anonymize_image(thumbnail)
-    thumb_pixmap.loadFromData(thumbnail.data)
-    thumb_pixmap = thumb_pixmap.scaledToWidth(80)
-    thumbnail_path = thumbnail_dir_path / path.name
+
+    thumb_pixmap = QPixmap()
+    thumb_pixmap.loadFromData(thumbnail)
+
+    thumbnail_path = thumbnail_dir_path / f'anon_{path.name}.jpg'
 
     f = QFile(thumbnail_path)
     f.open(QIODevice.OpenModeFlag.WriteOnly)
 
     try:
-        thumb_pixmap.save(f, 'PNG')
+        thumb_pixmap.save(f, 'JPG')
+    finally:
+        f.close()
+
+    thumb_pixmap = thumb_pixmap.scaledToWidth(80)
+    thumbnail_path = thumbnail_dir_path / f'{path.name}.jpg'
+
+    f = QFile(thumbnail_path)
+    f.open(QIODevice.OpenModeFlag.WriteOnly)
+
+    try:
+        thumb_pixmap.save(f, 'JPG')
     finally:
         f.close()
 
@@ -142,8 +163,9 @@ def generate_thumbnails(path: Path):
         thumbnail_dir_path.mkdir(exist_ok=True)
         generate_thumbnail_partial = partial(generate_thumbnail, thumbnail_dir_path)
 
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            executor.map(generate_thumbnail_partial, arw_files)
+        tuple(map(generate_thumbnail_partial, arw_files))
+        # with concurrent.futures.ProcessPoolExecutor() as executor:
+        #     executor.map(generate_thumbnail_partial, arw_files)
 
 
 class RawIconProvider(QFileIconProvider):
@@ -156,7 +178,7 @@ class RawIconProvider(QFileIconProvider):
                 thumbnail_dir_path = Path(f'{Path(file_path).parent}/.thumbs')
 
                 thumbnail_dir_path.mkdir(exist_ok=True)
-                thumbnail_path = Path(f'{thumbnail_dir_path}/{file_name}.png')
+                thumbnail_path = Path(f'{thumbnail_dir_path}/{file_name}.jpg')
 
                 if thumbnail_path.exists():
                     thumb_pixmap = QPixmap()
