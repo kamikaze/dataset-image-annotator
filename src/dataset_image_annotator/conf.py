@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, PostgresDsn, SecretStr
+from pydantic import PostgresDsn, SecretStr
 from python3_commons.conf import CommonSettings
 
 
