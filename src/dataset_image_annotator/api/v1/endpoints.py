@@ -10,6 +10,7 @@ from fastapi_pagination import Page
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import AuthenticationBackend, JWTStrategy, CookieTransport
 from pydantic import Json
+from python3_commons.db import connect_to_db
 
 from dataset_image_annotator import core
 from dataset_image_annotator.api import users
@@ -21,7 +22,6 @@ from dataset_image_annotator.conf import settings
 from dataset_image_annotator.core import upload_handler
 from dataset_image_annotator.db import database
 from dataset_image_annotator.db.models import User
-from dataset_image_annotator.helpers import connect_to_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -46,7 +46,7 @@ users_router = fastapi_users.get_users_router(UserRead, UserUpdate, requires_ver
 
 @router.on_event('startup')
 async def startup():
-    await connect_to_db(database)
+    await connect_to_db(database, settings.db_dsn)
 
 
 @router.on_event('shutdown')
