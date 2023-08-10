@@ -7,7 +7,6 @@ from fastapi_users.exceptions import UserAlreadyExists
 from dataset_image_annotator.api.users import get_user_manager_context
 from dataset_image_annotator.api.v1.schemas import UserCreate
 from dataset_image_annotator.conf import settings
-from dataset_image_annotator.db import database
 from dataset_image_annotator.db.user_db_helpers import get_async_session_context, get_user_db_context
 
 logging.config.dictConfig({
@@ -55,8 +54,6 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser():
-    await database.connect()
-
     try:
         async with get_async_session_context() as session:
             async with get_user_db_context(session) as user_db:
@@ -73,8 +70,6 @@ async def create_superuser():
                     logger.info(f'User created: {settings.bootstrap_user_email}')
     except UserAlreadyExists:
         logger.warning(f'User already exists: {settings.bootstrap_user_email}')
-    finally:
-        await database.disconnect()
 
 
 def get_parsed_args():

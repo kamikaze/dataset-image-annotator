@@ -61,7 +61,6 @@ class ImageSampleAnnotation(BaseDBModel, Base):
     color = Column(String(32))
     votes = Column(Integer, nullable=False, default=0)
 
-
     __table_args__ = (
         UniqueConstraint('user_id', 'image_sample_id', name='uq_image_sample_annotation_item'),
     )
