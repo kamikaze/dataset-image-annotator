@@ -3,11 +3,11 @@ from python3_commons.conf import CommonSettings
 
 
 class Settings(CommonSettings):
-    db_dsn: PostgresDsn = None
+    db_dsn: PostgresDsn | None = None
     service_addr: str = '127.0.0.1'
     service_port: int = 8080
     bootstrap_user_email: str | None = None
-    bootstrap_user_password: SecretStr = None
+    bootstrap_user_password: SecretStr | None = None
     auth_secret: SecretStr = 'TODO-REPLACE'
     timezone: str = 'UTC'
 
