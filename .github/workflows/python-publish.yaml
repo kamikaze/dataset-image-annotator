@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
     - name: Install dependencies
@@ -33,31 +33,7 @@ jobs:
     - name: Build package
       run: python -m build
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-
-  docker-build-and-push:
-    name: Build and push Docker images
-    needs: pypi-build-and-push
-    uses: ./.github/workflows/reusable-docker-build.yaml
-
-    permissions:
-      contents: read
-      packages: write
-      pull-requests: write
-
-    secrets:
-      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    with:
-      dockerhub-enable: true
-      ghcr-enable: true
-      platforms: linux/amd64,linux/arm64
-      file: Dockerfile.release
-
-      image-names: |
-        kamikazer/${{ github.event.repository.name }}
-        ghcr.io/${{ github.repository }}
