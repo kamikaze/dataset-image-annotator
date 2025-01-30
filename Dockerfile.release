@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm as build-image
+FROM python:3.13-slim-bookworm as build-image
 
 WORKDIR /usr/local/app
 COPY src/dataset_image_annotator/db/migrations ./migrations/
@@ -22,7 +22,7 @@ RUN  export APP_HOME=/usr/local/app \
          && python3 -m pip install -U dataset_image_annotator[web])
 
 
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 ENV  PYTHONPATH=/usr/local/app
 

@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm as build-image
+FROM python:3.13-slim-bookworm as build-image
 
 RUN apt-get update
 RUN apt-get install -y curl ca-certificates gnupg
@@ -29,7 +29,7 @@ RUN  (python3 -m venv venv \
       && python3 -m pip install -U /tmp/build/dist/*.whl)
 
 
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 ENV  PYTHONPATH=/usr/local/app
 
